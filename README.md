@@ -11,6 +11,11 @@ Effortlessly transcribe, search, and ask questions about textual content found i
     ```
 2. Install and build dependencies:
    ```bash
+   # Run the Flux commands to authenticate and install Flux Pro
+   composer config repositories.flux-pro composer https://composer.fluxui.dev
+   composer config http-basic.composer.fluxui.dev [USERNAME] [TOKEN]
+   composer require livewire/flux-pro
+   # Then install and build all dependencies
    composer install
    bun install && bun build
     ```
@@ -20,15 +25,20 @@ TODO: what documentation should be added here? Does Sentry need to be included?
    ```bash
    cp .env.example .env
    ```
-4. Generate an app key:
+4. Run IDE Helper generation commands
+    ```bash
+    php artisan ide-helper:generate
+    php artisan ide-helper:meta
+   ```
+5. Generate an app key:
     ```bash
     php artisan key:generate
     ```
-5. Run database migrations:
+6. Run database migrations:
     ```bash
     php artisan migrate
     ```
-6. Run the development server:
+7. Run the development server:
     ```bash
     composer run dev
     ```

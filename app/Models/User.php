@@ -77,6 +77,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get the user's searches
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Search>
      */
     public function searches(): HasMany
     {
