@@ -2,7 +2,7 @@
 
 use App\Models\Search;
 use App\Enums\SearchStatus;
-use Livewire\Volt\Component;
+use Livewire\Component;
 use Livewire\Attributes\{Computed};
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
