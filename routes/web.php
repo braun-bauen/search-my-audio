@@ -4,12 +4,11 @@ use App\Http\Middleware\Subscribed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Laravel\Cashier\Http\Controllers\WebhookController;
-use Livewire\Volt\Volt;
 
 /**
  * Home - Landing Page
  */
-Volt::route('/', 'home')->name('home');
+Route::livewire('/', 'home')->name('home');
 
 /**
  * Stripe: Webhooks
@@ -44,9 +43,9 @@ Route::get('/checkout-success', function (Request $request) {
  * Volt Pages - Authenticated and Email Verified
  */
 Route::middleware(['auth', 'verified'])->group(function () {
-    Volt::route('new', 'new')->name('new');
-    Volt::route('results/{id}', 'results')->name('results');
-    Volt::route('history', 'history')->name('history')->middleware([Subscribed::class]);
+    Route::livewire('new', 'new')->name('new');
+    Route::livewire('results/{id}', 'results')->name('results');
+    Route::livewire('history', 'history')->name('history')->middleware([Subscribed::class]);
 });
 
 /**
@@ -69,9 +68,9 @@ Route::middleware(['auth'])->group(function () {
             ]);
     })->name('subscribe-basic');
 
-    Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
-    Volt::route('settings/password', 'settings.password')->name('settings.password');
-    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
+    Route::livewire('settings/profile', 'settings.profile')->name('settings.profile');
+    Route::livewire('settings/password', 'settings.password')->name('settings.password');
+    Route::livewire('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
 
 require __DIR__.'/auth.php';
