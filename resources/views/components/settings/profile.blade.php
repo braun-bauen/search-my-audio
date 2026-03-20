@@ -80,7 +80,7 @@ new #[Title('Profile')] class extends Component
 <section class="w-full">
     @include('partials.settings-heading')
 
-    <x-settings.layout :heading="__('Profile')" :subheading="__('Update your name and email address')">
+    <x-layouts::settings :heading="__('Profile')" :subheading="__('Update your name and email address')">
         <form wire:submit="updateProfileInformation" class="my-6 w-full space-y-6">
             <flux:input wire:model="name" :label="__('Name')" type="text" required autofocus autocomplete="name" />
 
@@ -120,5 +120,5 @@ new #[Title('Profile')] class extends Component
         </form>
 
         <livewire:settings.delete-user-form />
-    </x-settings.layout>
+    </x-layouts::settings>
 </section>

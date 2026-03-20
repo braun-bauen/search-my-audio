@@ -40,7 +40,7 @@ Route::get('/checkout-success', function (Request $request) {
 })->name('checkout.success');
 
 /**
- * Volt Pages - Authenticated and Email Verified
+ * Pages - Authenticated and Email Verified
  */
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('new', 'new')->name('new');

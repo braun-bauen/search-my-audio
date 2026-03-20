@@ -1,4 +1,4 @@
-<x-layouts.app.header :title="$title ?? null">
+<x-layouts::header :title="$title ?? null">
     <flux:main container id="content" class="!py-8 !lg:py-12">
         {{ $slot }}
     </flux:main>
@@ -14,4 +14,4 @@
         href="#content"
         class="!fixed right-0 top-5/6 rounded-r-none -mr-1"
     ></flux:button>
-</x-layouts.app.header>
+</x-layouts::header>
