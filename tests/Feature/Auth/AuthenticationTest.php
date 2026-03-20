@@ -14,7 +14,7 @@ test('login screen can be rendered', function () {
 test('users can authenticate using the login screen', function () {
     $user = User::factory()->create();
 
-    $response = Livewire::test('auth.login')
+    $response = Livewire::test('pages::auth.login')
         ->set('email', $user->email)
         ->set('password', 'password')
         ->call('login');

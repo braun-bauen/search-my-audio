@@ -8,7 +8,7 @@ use Laravel\Cashier\Http\Controllers\WebhookController;
 /**
  * Home - Landing Page
  */
-Route::livewire('/', 'home')->name('home');
+Route::livewire('/', 'pages::home')->name('home');
 
 /**
  * Stripe: Webhooks
@@ -43,9 +43,9 @@ Route::get('/checkout-success', function (Request $request) {
  * Pages - Authenticated and Email Verified
  */
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::livewire('new', 'new')->name('new');
-    Route::livewire('results/{id}', 'results')->name('results');
-    Route::livewire('history', 'history')->name('history')->middleware([Subscribed::class]);
+    Route::livewire('new', 'pages::new')->name('new');
+    Route::livewire('results/{id}', 'pages::results')->name('results');
+    Route::livewire('history', 'pages::history')->name('history')->middleware([Subscribed::class]);
 });
 
 /**
@@ -68,9 +68,9 @@ Route::middleware(['auth'])->group(function () {
             ]);
     })->name('subscribe-basic');
 
-    Route::livewire('settings/profile', 'settings.profile')->name('settings.profile');
-    Route::livewire('settings/password', 'settings.password')->name('settings.password');
-    Route::livewire('settings/appearance', 'settings.appearance')->name('settings.appearance');
+    Route::livewire('settings/profile', 'pages::settings.profile')->name('settings.profile');
+    Route::livewire('settings/password', 'pages::settings.password')->name('settings.password');
+    Route::livewire('settings/appearance', 'pages::settings.appearance')->name('settings.appearance');
 });
 
 require __DIR__.'/auth.php';

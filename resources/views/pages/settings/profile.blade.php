@@ -119,6 +119,6 @@ new #[Title('Profile')] class extends Component
             </div>
         </form>
 
-        <livewire:settings.delete-user-form />
+        <livewire:delete-user-form />
     </x-layouts::settings>
 </section>
