@@ -94,6 +94,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Allowed Classes
+    |--------------------------------------------------------------------------
+    |
+    | This option defines which classes can be unserialized when values are
+    | retrieved from cache. By default, no classes are allowed to be
+    | unserialized, which helps protect against gadget chain attacks.
+    |
+    */
+
+    'serializable_classes' => false,
+
+    /*
+    |--------------------------------------------------------------------------
     | Cache Key Prefix
     |--------------------------------------------------------------------------
     |
@@ -103,6 +116,6 @@ return [
     |
     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
+    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel')).'-cache-'),
 
 ];
