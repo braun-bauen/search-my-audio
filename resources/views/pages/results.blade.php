@@ -1,22 +1,31 @@
 <?php
 
-use App\Models\Search;
 use App\Enums\SearchStatus;
-use Livewire\Component;
-use Livewire\Attributes\{Computed};
+use App\Models\Search;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Livewire\Attributes\Computed;
+use Livewire\Component;
+use Livewire\WithPagination;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
-new class extends Component {
-    use \Livewire\WithPagination;
+new class extends Component
+{
+    use WithPagination;
 
     public int $id;
+
     public Search $search;
+
     public string $query;
+
     public string $activeTab = 'all';
+
     public string $sortBy = 'query_count'; // Default sort column
+
     public string $sortDirection = 'desc'; // Default sort direction
+
     public string $sortString = 'query_count|desc';
 
     // TODO Cancel job? delete should cancel as well
@@ -33,7 +42,7 @@ new class extends Component {
 
     public function rendering(View $view): void
     {
-        $view->title('Results for "' . $this->query . '"');
+        $view->title('Results for "'.$this->query.'"');
     }
 
     public function updatedSortString(string $sortString): void
@@ -101,14 +110,14 @@ new class extends Component {
             Log::info('Search: deleting search {search}', ['search' => $this->search->id]);
             $this->redirectRoute('new', navigate: true);
             $this->search->delete();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Search: error deleting search {search}: {exception}', ['search' => $this->search, 'exception' => $e]);
         }
     }
 
-    public function downloadReport(): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function downloadReport(): StreamedResponse
     {
-        $name = 'audio-search-report-' . $this->search->id . '.csv';
+        $name = 'audio-search-report-'.$this->search->id.'.csv';
 
         return Storage::download($this->search->report_path, $name);
     }
@@ -213,7 +222,7 @@ new class extends Component {
     <flux:heading>This may take a few minutes</flux:heading>
     <flux:text>Feel free to close the page and return later.
         @if ($this->search->completion_email)
-        <span>You will recieve an email when processing is completed.
+        <span>You will receive an email when processing is completed.</span>
         @endif
     </flux:text>
     @endif
