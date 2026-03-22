@@ -10,8 +10,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-new class extends Component
-{
+new class extends Component {
     use WithPagination;
 
     public int $id;
@@ -42,7 +41,7 @@ new class extends Component
 
     public function rendering(View $view): void
     {
-        $view->title('Results for "'.$this->query.'"');
+        $view->title("Results for '$this->query'");
     }
 
     public function updatedSortString(string $sortString): void
@@ -67,7 +66,8 @@ new class extends Component
             $whereClause[] = ['query_count', '=', 0];
         }
 
-        return $this->search->files()
+        return $this->search
+            ->files()
             ->where($whereClause)
             ->orderBy($this->sortBy, $this->sortDirection)
             ->paginate(20);
@@ -111,20 +111,23 @@ new class extends Component
             $this->redirectRoute('new', navigate: true);
             $this->search->delete();
         } catch (Exception $e) {
-            Log::error('Search: error deleting search {search}: {exception}', ['search' => $this->search, 'exception' => $e]);
+            Log::error('Search: error deleting search {search}: {exception}', [
+                'search' => $this->search,
+                'exception' => $e,
+            ]);
         }
     }
 
     public function downloadReport(): StreamedResponse
     {
-        $name = 'audio-search-report-'.$this->search->id.'.csv';
+        $name = 'audio-search-report-' . $this->search->id . '.csv';
 
         return Storage::download($this->search->report_path, $name);
     }
 }; ?>
 
 <div>
-    <div class="flex flex-row flex-wrap items-center justify-between gap-2 mb-12">
+    <div class="mb-12 flex flex-row flex-wrap items-center justify-between gap-2">
         <flux:heading size="xl" level="1">Results for "{{ $query }}"</flux:heading>
 
         <flux:modal.trigger name="delete-search">
@@ -139,112 +142,116 @@ new class extends Component
     <div @if ($search->status !== SearchStatus::Completed) wire:poll.2s @endif>
         <flux:callout class="mb-4" inline color="{{ $this->status['color'] }}" icon="{{ $this->status['icon'] }}">
             @if ($search->status === SearchStatus::Processing)
-            <flux:callout.heading class="justify-between">
-                Processing {{ count($search->files) }} {{ Str::plural('file', count($search->files)) }}
-                <flux:icon.loading variant="micro" />
-            </flux:callout.heading>
+                <flux:callout.heading class="justify-between">
+                    Processing {{ count($search->files) }} {{ Str::plural('file', count($search->files)) }}
+                    <flux:icon.loading variant="micro" />
+                </flux:callout.heading>
             @elseif ($search->status === SearchStatus::Completed && $search->query_total > 0)
-            <flux:callout.heading>
-                Processing Completed
-                <flux:text>{{ $search->query_total }} total {{ Str::plural('match', $search->query_total) }}</flux:text>
-            </flux:callout.heading>
+                <flux:callout.heading>
+                    Processing Completed
+                    <flux:text>
+                        {{ $search->query_total }} total {{ Str::plural('match', $search->query_total) }}
+                    </flux:text>
+                </flux:callout.heading>
 
-            @if (Auth::user()->subscribed() && $search->report_path !== null)
-            <x-slot name="actions">
-                <flux:button wire:click="downloadReport" icon="arrow-down-tray">Export Matches</flux:button>
-            </x-slot>
-            @endif
-            @elseif ($search->status === SearchStatus::Completed && !$search->query_total > 0)
-            <flux:callout.heading>
-                Processing Completed
-                <flux:text>No matches found</flux:text>
-            </flux:callout.heading>
+                @if (Auth::user()->subscribed() && $search->report_path !== null)
+                    <x-slot name="actions">
+                        <flux:button wire:click="downloadReport" icon="arrow-down-tray">Export Matches</flux:button>
+                    </x-slot>
+                @endif
+            @elseif ($search->status === SearchStatus::Completed && ! $search->query_total > 0)
+                <flux:callout.heading>
+                    Processing Completed
+                    <flux:text>No matches found</flux:text>
+                </flux:callout.heading>
             @elseif ($search->status === SearchStatus::Pending)
-            <flux:callout.heading class="justify-between">
-                Uploading Files
-                <flux:icon.loading variant="micro" />
-            </flux:callout.heading>
+                <flux:callout.heading class="justify-between">
+                    Uploading Files
+                    <flux:icon.loading variant="micro" />
+                </flux:callout.heading>
             @else
-            <flux:callout.heading>Processing failed</flux:callout.heading>
+                <flux:callout.heading>Processing failed</flux:callout.heading>
             @endif
         </flux:callout>
     </div>
 
     @if ($search->status !== SearchStatus::Pending)
-    <!-- File controls -->
-    <div class="flex flex-row flex-wrap gap-2 justify-between items-end">
-        <div>
-            <flux:heading size="lg" level="2">Files</flux:heading>
-            <flux:text>
-                {{ $search->status === SearchStatus::Completed ? 'Searched' : 'Searching' }} {{ count($search->files) }} {{ Str::plural('file', count($search->files)) }}
-            </flux:text>
+        <!-- File controls -->
+        <div class="flex flex-row flex-wrap items-end justify-between gap-2">
+            <div>
+                <flux:heading size="lg" level="2">Files</flux:heading>
+                <flux:text>
+                    {{ $search->status === SearchStatus::Completed ? 'Searched' : 'Searching' }}
+                    {{ count($search->files) }} {{ Str::plural('file', count($search->files)) }}
+                </flux:text>
+            </div>
+
+            <div class="flex flex-row flex-wrap gap-2">
+                <flux:tabs variant="segmented" wire:model.live="activeTab">
+                    <flux:tab name="all">All</flux:tab>
+                    <flux:tab name="matches">Matches</flux:tab>
+                    <flux:tab name="misses">Misses</flux:tab>
+                </flux:tabs>
+
+                <flux:select variant="listbox" class="max-w-fit" wire:model.live="sortString">
+                    <x-slot name="trigger">
+                        <flux:select.button>
+                            <flux:icon.arrows-up-down variant="micro" class="mr-2 text-zinc-400" />
+                            <flux:select.selected />
+                        </flux:select.button>
+                    </x-slot>
+
+                    <flux:select.option value="query_count|desc" selected>Matches</flux:select.option>
+                    <flux:select.option value="parsed_date|asc">Date - Ascending</flux:select.option>
+                    <flux:select.option value="parsed_date|desc">Date - Descending</flux:select.option>
+                    <flux:select.option value="created_at|asc">Upload Order</flux:select.option>
+                </flux:select>
+            </div>
+        </div>
+        <!-- File list -->
+        <div wire:loading.delay.shortest wire:target="activeTab, sort" class="mt-4">
+            <flux:icon.loading />
         </div>
 
-        <div class="flex flex-row flex-wrap gap-2">
-            <flux:tabs variant="segmented" wire:model.live="activeTab">
-                <flux:tab name="all">All</flux:tab>
-                <flux:tab name="matches">Matches</flux:tab>
-                <flux:tab name="misses">Misses</flux:tab>
-            </flux:tabs>
+        <div wire:loading.remove.delay.shortest wire:target="activeTab, sort" class="mt-4 flex flex-col gap-2">
+            @if ($this->filteredFiles->isNotEmpty())
+                @foreach ($this->filteredFiles as $file)
+                    <livewire:file-results :file="$file" wire:key="{{ $file->id }}" />
+                @endforeach
 
-            <flux:select variant="listbox" class="max-w-fit" wire:model.live="sortString">
-                <x-slot name="trigger">
-                    <flux:select.button>
-                        <flux:icon.arrows-up-down variant="micro" class="mr-2 text-zinc-400" />
-                        <flux:select.selected />
-                    </flux:select.button>
-                </x-slot>
-
-                <flux:select.option value="query_count|desc" selected>Matches</flux:select.option>
-                <flux:select.option value="parsed_date|asc">Date - Ascending</flux:select.option>
-                <flux:select.option value="parsed_date|desc">Date - Descending</flux:select.option>
-                <flux:select.option value="created_at|asc">Upload Order</flux:select.option>
-            </flux:select>
+                <flux:pagination :paginator="$this->filteredFiles" />
+            @else
+                <flux:subheading>No results found</flux:subheading>
+            @endif
         </div>
-    </div>
-    <!-- File list -->
-    <div wire:loading.delay.shortest wire:target="activeTab, sort" class="mt-4">
-        <flux:icon.loading />
-    </div>
-
-    <div wire:loading.remove.delay.shortest wire:target="activeTab, sort" class="mt-4 flex flex-col gap-2">
-        @if ($this->filteredFiles->isNotEmpty())
-        @foreach ($this->filteredFiles as $file)
-        <livewire:file-results :file="$file" wire:key="{{ $file->id }}" />
-        @endforeach
-
-        <flux:pagination :paginator="$this->filteredFiles" />
-        @else
-        <flux:subheading>No results found</flux:subheading>
-        @endif
-    </div>
     @else
-    <flux:heading>This may take a few minutes</flux:heading>
-    <flux:text>Feel free to close the page and return later.
-        @if ($this->search->completion_email)
-        <span>You will receive an email when processing is completed.</span>
-        @endif
-    </flux:text>
+        <flux:heading>This may take a few minutes</flux:heading>
+        <flux:text>
+            Feel free to close the page and return later.
+            @if ($this->search->completion_email)
+                <span>You will receive an email when processing is completed.</span>
+            @endif
+        </flux:text>
     @endif
 </div>
 
 @script
-<script>
-    $wire.on('copy-to-clipboard', (event) => {
-        if (event.transcription) {
-            navigator.clipboard.writeText(event.transcription);
-            Flux.toast({
-                heading: 'Copied!',
-                text: 'The transcription has been copied to your clipboard.',
-                variant: 'success',
-            })
-        } else {
-            Flux.toast({
-                heading: 'Uh oh!',
-                text: 'The transcription could not be copied to your clipboard.',
-                variant: 'failure',
-            })
-        }
-    });
-</script>
+    <script>
+        $wire.on('copy-to-clipboard', (event) => {
+            if (event.transcription) {
+                navigator.clipboard.writeText(event.transcription);
+                Flux.toast({
+                    heading: 'Copied!',
+                    text: 'The transcription has been copied to your clipboard.',
+                    variant: 'success',
+                });
+            } else {
+                Flux.toast({
+                    heading: 'Uh oh!',
+                    text: 'The transcription could not be copied to your clipboard.',
+                    variant: 'failure',
+                });
+            }
+        });
+    </script>
 @endscript
