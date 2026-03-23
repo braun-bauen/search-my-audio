@@ -235,23 +235,21 @@ new class extends Component {
     @endif
 </div>
 
-@script
-    <script>
-        $wire.on('copy-to-clipboard', (event) => {
-            if (event.transcription) {
-                navigator.clipboard.writeText(event.transcription);
-                Flux.toast({
-                    heading: 'Copied!',
-                    text: 'The transcription has been copied to your clipboard.',
-                    variant: 'success',
-                });
-            } else {
-                Flux.toast({
-                    heading: 'Uh oh!',
-                    text: 'The transcription could not be copied to your clipboard.',
-                    variant: 'failure',
-                });
-            }
-        });
-    </script>
-@endscript
+<script>
+    $wire.on('copy-to-clipboard', (event) => {
+        if (event.transcription) {
+            navigator.clipboard.writeText(event.transcription);
+            Flux.toast({
+                heading: 'Copied!',
+                text: 'The transcription has been copied to your clipboard.',
+                variant: 'success',
+            });
+        } else {
+            Flux.toast({
+                heading: 'Uh oh!',
+                text: 'The transcription could not be copied to your clipboard.',
+                variant: 'failure',
+            });
+        }
+    });
+</script>
