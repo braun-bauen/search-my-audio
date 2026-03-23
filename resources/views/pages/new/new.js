@@ -5,6 +5,7 @@ Alpine.data('uploadHandler', () => ({
     failureCount: 0,
 
     handleDragOver(e) {
+        // @ts-ignore
         if (!@js(Auth::user()->subscribed()) && e.dataTransfer.items.length > 1) {
             e.dataTransfer.dropEffect = 'none';
             e.target.classList.add('!border-red-400');
