@@ -8,7 +8,7 @@ nixPkgs = ["...", "python311Packages.supervisor"]
 [phases.install]
 cmds = [
     "mkdir -p /var/log/nginx && mkdir -p /var/cache/nginx",
-    "composer config http-basic.composer.fluxui.dev isaacbraun2000@gmail.com 9137a3c1-3b33-44fe-ae4d-2aa5626f2aa9",
+    "composer config http-basic.composer.fluxui.dev $FLUX_USERNAME $FLUX_LICENSE_KEY",
     "composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs",
     "npm ci --audit false",
 ]
