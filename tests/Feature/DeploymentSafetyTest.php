@@ -39,6 +39,7 @@ function historicalSearch(User $owner): array
 it('preserves owned historical results, transcript bytes and report access while denying another user', function () {
     $owner = User::factory()->create();
     [$search, $file] = historicalSearch($owner);
+    $file->refresh();
     $before = $file->getRawOriginal();
     $hash = hash('sha256', Storage::get($file->transcription_path));
 
