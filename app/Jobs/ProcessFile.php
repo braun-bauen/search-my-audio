@@ -18,6 +18,8 @@ class ProcessFile implements ShouldQueue
 {
     use Batchable, Queueable;
 
+    public int $timeout = 720;
+
     /****
      * Initializes the ProcessFile job with the given search and audio file models.
      *
@@ -29,7 +31,9 @@ class ProcessFile implements ShouldQueue
         public Search $search,
         public AudioFile $file,
         public bool $retry = false,
-    ) {}
+    ) {
+        $this->onQueue('transcription');
+    }
 
     /****
      * Processes an audio file for transcription and search as a queued job.
@@ -38,7 +42,7 @@ class ProcessFile implements ShouldQueue
      */
     public function handle(): void
     {
-        if ($this->batch()->cancelled()) {
+        if ($this->batch()?->cancelled()) {
             // Determine if the batch has been cancelled...
             return;
         }
@@ -72,7 +76,8 @@ class ProcessFile implements ShouldQueue
         } catch (\Exception $e) {
             $this->file->status = FileStatus::Failed;
             $this->file->save();
-            throw new \Exception('Error processing file: ' . $e->getMessage());
+            // Provider/transport exceptions may contain bodies, URLs, or credentials.
+            throw new \RuntimeException('Error processing file');
         }
     }
 
@@ -81,7 +86,7 @@ class ProcessFile implements ShouldQueue
      *
      * Sets the audio file status to failed and saves it. Reports the exception to Sentry if available; otherwise logs a warning.
      *
-     * @param \Throwable $exception The exception that caused the job to fail.
+     * @param  \Throwable  $exception  The exception that caused the job to fail.
      */
     public function failed(\Throwable $exception)
     {
@@ -99,6 +104,7 @@ class ProcessFile implements ShouldQueue
      * Transcribes the audio file, searches for query matches, and stores the results as a JSON file.
      *
      * @return array An array containing the transcription file path and the number of query matches found.
+     *
      * @throws \Exception If the match count is missing from the search results or if writing to storage fails.
      */
     protected function processAndStore(): array
@@ -115,7 +121,7 @@ class ProcessFile implements ShouldQueue
         }
 
         // Store search response to file
-        $transcription_path = 'transcriptions/' . Str::uuid()->toString() . '.json';
+        $transcription_path = 'transcriptions/'.Str::uuid()->toString().'.json';
 
         try {
             Storage::put($transcription_path, json_encode($matches_json));
@@ -124,7 +130,7 @@ class ProcessFile implements ShouldQueue
         } catch (\Exception $e) {
             // Let the caller decide how to mark failure
             throw new \Exception(
-                'Error writing transcription to storage: ' . $e->getMessage(),
+                'Error writing transcription to storage: '.$e->getMessage(),
                 previous: $e
             );
         }
@@ -145,8 +151,13 @@ class ProcessFile implements ShouldQueue
         // Get the original filename or create one
         $filename = basename($audio_path);
 
+        $started = hrtime(true);
+        $status = null;
+
         try {
-            $response = Http::withToken(env('OPENAI_API_KEY'))
+            $response = Http::withToken(config('services.openai.key'))
+                ->connectTimeout(10)
+                ->timeout(600)
                 ->attach(
                     'file',
                     $stream,
@@ -158,13 +169,15 @@ class ProcessFile implements ShouldQueue
                     'response_format' => 'json',
                 ]);
 
+            $status = $response->status();
+
             // Close the stream
             if (is_resource($stream)) {
                 fclose($stream);
             }
 
             if (! $response->successful()) {
-                throw new \Exception('Whisper API error: ' . $response->body());
+                throw new \Exception('Whisper API request failed (HTTP '.$response->status().')');
             }
 
             $result = $response->json();
@@ -175,7 +188,14 @@ class ProcessFile implements ShouldQueue
             if (is_resource($stream)) {
                 fclose($stream);
             }
-            throw $e;
+            throw new \RuntimeException('Transcription request failed');
+        } finally {
+            Log::info('pipeline_provider', [
+                'search_id' => $this->search->id,
+                'file_id' => $this->file->id,
+                'duration_ms' => round((hrtime(true) - $started) / 1e6),
+                'http_status' => $status,
+            ]);
         }
     }
 

@@ -33,7 +33,7 @@ new #[Title('History')] class extends Component
             // Refresh computed searches() property
             unset($this->searches);
         } catch (\Exception $e) {
-            Log::error('History: error deleting search {search}: {exception}', ['search' => $this->selectedSearch->id, 'exception' => $e]);
+            Log::error('Search deletion failed', ['search_id' => $this->selectedSearch->id, 'exception_class' => $e::class]);
         }
     }
 
