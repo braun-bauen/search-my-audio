@@ -21,7 +21,9 @@ class BatchUpload implements ShouldQueue
         protected Search $search,
         protected array $fileArray,
         protected string $timezone,
-    ) {}
+    ) {
+        $this->onQueue('ingest');
+    }
 
     /**
      * Execute the job.
@@ -32,7 +34,7 @@ class BatchUpload implements ShouldQueue
 
         $firstJob = new UploadFile($this->search, $this->fileArray[0], $this->timezone, $fileCount);
 
-        $batch = Bus::batch($firstJob)->allowFailures();
+        $batch = Bus::batch([$firstJob])->onQueue('ingest')->allowFailures();
 
         foreach (array_slice($this->fileArray, 1) as $file) {
             $batch->add(new UploadFile($this->search, $file, $this->timezone, $fileCount));
@@ -43,7 +45,7 @@ class BatchUpload implements ShouldQueue
 
     public function failed(\Throwable $exception)
     {
-        Log::error('Batch failed', ['search' => $this->search->id, 'ex' => $exception]);
+        Log::error('Batch failed', ['search_id' => $this->search->id, 'exception_class' => $exception::class]);
 
         $this->search->status = SearchStatus::Failed;
         $this->search->save();

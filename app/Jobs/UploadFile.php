@@ -2,8 +2,6 @@
 
 namespace App\Jobs;
 
-use App\Enums\FileStatus;
-use App\Enums\SearchStatus;
 use App\Models\AudioFile;
 use App\Models\Search;
 use Illuminate\Bus\Batchable;
@@ -48,9 +46,10 @@ class UploadFile implements ShouldQueue
         $newPath = "audioFiles/{$this->file['path']}";
 
         // Check if file doesn't exist
-        if (!Storage::exists($tempPath)) {
+        if (! Storage::exists($tempPath)) {
             // TODO: how should this be handled? Show error for file?
             Log::error('UploadFiles: file not found', ['path' => $tempPath]);
+
             return;
         }
 
@@ -88,14 +87,14 @@ class UploadFile implements ShouldQueue
         try {
             Storage::move($tempPath, $newPath);
         } catch (\Exception $e) {
-            Log::error('UploadFiles: error moving file', ['exception' => $e]);
+            Log::error('UploadFiles: error moving file', ['exception_class' => $e::class]);
         }
     }
 
     /**
      * Creates an audio file record from the uploaded file and queues it for processing.
      *
-     * @param string $path The storage path of the uploaded file.
+     * @param  string  $path  The storage path of the uploaded file.
      */
     public function createAndQueue($path): void
     {
@@ -108,6 +107,6 @@ class UploadFile implements ShouldQueue
         );
 
         // Queue the file for processing
-        $this->batch()->add(new ProcessFile($this->search, $file));
+        ProcessFile::dispatch($this->search, $file);
     }
 }

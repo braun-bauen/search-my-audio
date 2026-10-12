@@ -57,9 +57,10 @@ class Search extends Model
      *
      * Throws an exception if no files are provided. Returns the ID of the created search.
      *
-     * @param array $searchData Associative array with keys: user_id, query, and completion_email.
-     * @param array $fileArray Array of [name, path] pairs representing files to associate.
+     * @param  array  $searchData  Associative array with keys: user_id, query, and completion_email.
+     * @param  array  $fileArray  Array of [name, path] pairs representing files to associate.
      * @return int The ID of the newly created search.
+     *
      * @throws Exception If no files are provided or creation fails.
      */
     public static function createWithFiles(array $searchData, array $fileArray): int
@@ -81,8 +82,7 @@ class Search extends Model
             return $search->id;
         } catch (Exception $e) {
             Log::error('Search creation failed', [
-                'error' => $e->getMessage(),
-                'search_data' => $searchData,
+                'exception_class' => $e::class,
             ]);
             throw $e;
         }
@@ -93,7 +93,7 @@ class Search extends Model
      *
      * If no files remain in the 'Queued' or 'Uploaded' status, marks the search as completed, saves it, and sends a completion email. If not a retry and matches were found, dispatches a report creation job before completing.
      *
-     * @param bool $retry Indicates if this is a retry attempt.
+     * @param  bool  $retry  Indicates if this is a retry attempt.
      */
     public function attemptToFinish(bool $retry): void
     {
@@ -103,12 +103,12 @@ class Search extends Model
             ->doesntExist();
 
         // If all files have NOT been processed, exit
-        if (!$allFilesProcessed) {
+        if (! $allFilesProcessed) {
             return;
         }
 
         // Create Report if matches found
-        if (!$retry && $this->query_total > 0) {
+        if (! $retry && $this->query_total > 0) {
             CreateReport::dispatch($this);
         }
 
@@ -122,7 +122,7 @@ class Search extends Model
      *
      * If the query total is not set, it initializes it with the given count.
      *
-     * @param int $count The number to add to the query total.
+     * @param  int  $count  The number to add to the query total.
      */
     public function addToQueryCount(int $count): void
     {

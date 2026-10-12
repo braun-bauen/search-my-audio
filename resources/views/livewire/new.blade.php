@@ -89,7 +89,7 @@ new #[Title('New')] class extends Component
                 fileArray: $this->fileInfo,
             );
 
-            Log::info('Created New Search: search "{query}"', ['query' => $this->query]);
+            Log::info('Created new search');
 
             $this->redirectRoute('results', ['id' => $searchId], navigate: true);
         }
