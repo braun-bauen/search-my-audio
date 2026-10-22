@@ -1,8 +1,8 @@
 # PHP 8.5.12 deployment
 
-The root Dockerfile replaces Nixpacks with `php:8.5.12-fpm-bookworm`, nginx on port 80, and Supervisor. It preserves the database queue with 12 workers, 30 MB PHP upload limit, and 35 MB request limit. Node is used only to compile assets. The final image uses the same PHP build for CLI workers and FPM.
+The root Dockerfile replaces Nixpacks with `php:8.5.12-fpm-bookworm`, nginx on port 80, and Supervisor. It preserves the database queue with 12 workers, 30 MB PHP upload limit, and 35 MB request limit. Node 22.23.4 is used only to compile assets. The final image uses the same PHP build for CLI workers and FPM.
 
-Composer targets PHP 8.5.12 for dependency resolution. Installation does not ignore platform requirements, and `composer check-platform-reqs` checks the actual runtime regardless of that resolution setting. Keep the PHP base, Composer platform/requirement, CI PHP versions, and smoke-test assertion in sync when updating PHP.
+Composer targets PHP 8.5.12 for dependency resolution. Installation does not ignore platform requirements, and `composer check-platform-reqs` checks the actual runtime regardless of that resolution setting. Keep the PHP base, Composer platform/requirement, CI PHP versions, and smoke-test assertion in sync when updating PHP. Keep the Node image, package engine, and CI Node versions pinned to the same patched release.
 
 ## Build and test
 

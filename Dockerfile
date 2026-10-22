@@ -28,7 +28,7 @@ COPY . .
 RUN composer dump-autoload --no-dev --optimize --no-scripts \
     && composer check-platform-reqs --no-dev
 
-FROM node:22-bookworm-slim AS assets
+FROM node:22.23.4-bookworm-slim AS assets
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
