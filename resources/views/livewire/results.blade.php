@@ -102,7 +102,7 @@ new class extends Component {
             $this->redirectRoute('new', navigate: true);
             $this->search->delete();
         } catch (\Exception $e) {
-            Log::error('Search: error deleting search {search}: {exception}', ['search' => $this->search, 'exception' => $e]);
+            Log::error('Search deletion failed', ['search_id' => $this->search->id, 'exception_class' => $e::class]);
         }
     }
 

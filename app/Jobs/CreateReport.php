@@ -2,12 +2,12 @@
 
 namespace App\Jobs;
 
+use App\Models\Search;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Str;
-use App\Models\Search;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CreateReport implements ShouldQueue
 {
@@ -18,7 +18,9 @@ class CreateReport implements ShouldQueue
      */
     public function __construct(
         public Search $search,
-    ) {}
+    ) {
+        $this->onQueue('lightweight');
+    }
 
     /**
      * Execute the job.
@@ -28,7 +30,7 @@ class CreateReport implements ShouldQueue
         try {
             $path = $this->createCsv();
         } catch (\Exception $e) {
-            Log::error('REPORT: ' . $e->getMessage());
+            Log::error('Report creation failed', ['search_id' => $this->search->id, 'exception_class' => $e::class]);
             $this->search->sendEmail();
         }
 
@@ -62,9 +64,9 @@ class CreateReport implements ShouldQueue
         }
 
         // Store CSV
-        $path = 'reports/' . Str::uuid()->toString() . '.csv';
+        $path = 'reports/'.Str::uuid()->toString().'.csv';
 
-        if (!Storage::put($path, $report)) {
+        if (! Storage::put($path, $report)) {
             throw new \Exception('Failed to store CSV');
         }
 
