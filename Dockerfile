@@ -4,7 +4,7 @@ FROM php:8.5.12-fpm-bookworm AS php-base
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates curl libicu-dev libonig-dev libpq-dev libzip-dev \
-        nginx supervisor unzip \
+        nginx supervisor unzip util-linux \
     && docker-php-ext-install -j"$(nproc)" bcmath intl mbstring pcntl pdo_mysql pdo_pgsql zip \
     && rm -rf /var/lib/apt/lists/* \
     && php -r 'exit(PHP_VERSION === "8.5.12" ? 0 : 1);'
