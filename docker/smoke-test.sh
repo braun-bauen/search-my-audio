@@ -23,18 +23,22 @@ docker run -d --name "$container" \
     "$image" sh -c 'touch /app/storage/testing.sqlite; exec app-entrypoint supervisord -c /etc/supervisor/conf.d/app.conf'
 
 ready=false
+processes=
 for (( attempt=0; attempt<60; attempt++ )); do
     if docker exec "$container" curl --fail --silent http://127.0.0.1/up >/dev/null; then
-        ready=true
-        break
+        processes=$(docker exec "$container" supervisorctl -c /etc/supervisor/conf.d/app.conf status)
+        if test "$(printf '%s\n' "$processes" | grep -c RUNNING)" -eq 14 \
+            && ! printf '%s\n' "$processes" | grep -Eq 'FATAL|BACKOFF|EXITED|STARTING'; then
+            ready=true
+            break
+        fi
     fi
     sleep 2
 done
 test "$ready" = true
-processes=$(docker exec "$container" supervisorctl -c /etc/supervisor/conf.d/app.conf status)
 printf '%s\n' "$processes"
 test "$(printf '%s\n' "$processes" | grep -c RUNNING)" -eq 14
-! printf '%s\n' "$processes" | grep -Eq 'FATAL|BACKOFF|EXITED'
+! printf '%s\n' "$processes" | grep -Eq 'FATAL|BACKOFF|EXITED|STARTING'
 docker exec "$container" php artisan migrate:status --no-ansi
 test "$(docker exec "$container" curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1/.env)" = 403
 test "$(docker exec "$container" curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1/arbitrary.php)" = 404
