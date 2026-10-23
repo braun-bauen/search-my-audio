@@ -1,4 +1,4 @@
-name: Docker
+name: Container smoke test
 
 on:
   pull_request:
@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   container:
+    name: Production container smoke test
     runs-on: ubuntu-latest
     environment: Testing
     steps:
@@ -24,5 +25,5 @@ jobs:
             --secret id=FLUX_USERNAME,env=FLUX_USERNAME \
             --secret id=FLUX_LICENSE_KEY,env=FLUX_LICENSE_KEY \
             --tag search-my-audio:test .
-      - name: Verify production container
+      - name: Run container smoke test
         run: bash docker/smoke-test.sh search-my-audio:test

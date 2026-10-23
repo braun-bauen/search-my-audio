@@ -18,7 +18,7 @@ bash docker/smoke-test.sh search-my-audio:php8512
 
 Never pass credentials through build arguments. The Dockerfile requires secret mounts and does not write Composer authentication to disk. `.dockerignore` excludes local environment files, credentials, dependencies, databases, and runtime storage. The image build needs no production database, APP_KEY, or API credentials. Frontend assets include Flux's vendor templates.
 
-The Docker CI job uses the existing Testing environment's Flux secrets. It builds the real production image, verifies CLI/FPM versions and platform requirements, and boots nginx, FPM, and all 12 workers against a disposable SQLite database. It checks Laravel's `/up`, migrations, and blocked sensitive/PHP paths. The existing application test job runs on PHP 8.5.12.
+The Container smoke test workflow (`.github/workflows/container-smoke-test.yml`) uses the existing Testing environment's Flux secrets. It builds the real production image, verifies CLI/FPM versions and platform requirements, and boots nginx, FPM, and all 12 workers against a disposable SQLite database. It checks Laravel's `/up`, migrations, and blocked sensitive/PHP paths. The existing application test job runs on PHP 8.5.12.
 
 ## Coolify cutover
 
