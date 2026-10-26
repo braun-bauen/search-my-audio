@@ -8,7 +8,7 @@ if [ "$1" = supervisord ]; then
     chown -R www-data:www-data storage bootstrap/cache
     # Runtime configuration and database credentials must never enter build layers.
     runuser -u www-data -- php artisan package:discover --ansi
-    runuser -u www-data -- php artisan migrate --force
+    # Migrations require a reviewed operator action after backup and worker coordination.
     runuser -u www-data -- php artisan optimize
 fi
 
