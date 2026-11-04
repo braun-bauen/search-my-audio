@@ -25,7 +25,7 @@ TODO: what documentation should be added here? Does Sentry need to be included?
    ```bash
    cp .env.example .env
    ```
-4. Run IDE Helper generation commands
+4. MAYBE: Run IDE Helper generation commands
     ```bash
     php artisan ide-helper:generate
     php artisan ide-helper:meta
